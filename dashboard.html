@@ -1,145 +1,117 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Virtual LEVEL - Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>Virtual LEVEL OPS</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body class="dashboard-body">
-  <header class="topbar">
-    <div class="brand-inline">
-      <img src="img/level-logo.png" alt="LEVEL" class="logo-small" />
-      <span class="brand-name">Virtual LEVEL</span>
-    </div>
-    <div class="topbar-right">
-      <span id="currentUser"></span>
-      <button id="logoutBtn" class="ghost-btn">Salir</button>
-    </div>
-  </header>
+<body class="apple-body">
 
-  <main class="layout">
-    <nav class="sidebar">
-      <button class="nav-item active" data-section="planning">Planning</button>
-      <button class="nav-item" data-section="booking">Bookings</button>
-      <button class="nav-item" data-section="logbook">Logbook</button>
-    </nav>
+<div class="app-container">
 
-    <section class="content">
-      <!-- Planning -->
-      <div id="planning" class="section active">
-        <h2>Planificación de vuelos</h2>
-        <form id="flightForm" class="card">
-          <div class="grid-2">
-            <div>
-              <label>Número de vuelo</label>
-              <input type="text" name="flight_number" required />
-            </div>
-            <div>
-              <label>Origen</label>
-              <input type="text" name="origin" required />
-            </div>
-            <div>
-              <label>Destino</label>
-              <input type="text" name="destination" required />
-            </div>
-            <div>
-              <label>Salida (UTC)</label>
-              <input type="text" name="departure_time" placeholder="2026-02-25T10:00" />
-            </div>
-            <div>
-              <label>Llegada (UTC)</label>
-              <input type="text" name="arrival_time" placeholder="2026-02-25T14:00" />
-            </div>
-          </div>
-          <button type="submit" class="primary-btn">Crear ruta</button>
-          <p id="flightMsg" class="success-msg"></p>
-        </form>
+<!-- Sidebar -->
+<aside class="sidebar">
+<div class="sidebar-top">
+<img src="level-logo.png" class="logo-small">
+<h3>Virtual LEVEL</h3>
+</div>
 
-        <div class="card">
-          <h3>Rutas disponibles</h3>
-          <table id="flightsTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Origen</th>
-                <th>Destino</th>
-                <th>Salida</th>
-                <th>Llegada</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+<nav>
+<button class="nav-item active" data-section="overview">Overview</button>
+<button class="nav-item" data-section="flights">Flights</button>
+<button class="nav-item" data-section="bookings">Bookings</button>
+<button class="nav-item" data-section="logbook">Logbook</button>
+</nav>
 
-      <!-- Booking -->
-      <div id="booking" class="section">
-        <h2>Mis bookings</h2>
-        <div class="card">
-          <table id="bookingsTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Vuelo</th>
-                <th>Origen</th>
-                <th>Destino</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+<div class="sidebar-bottom">
+<button id="logoutBtn" class="logout-btn">Logout</button>
+</div>
+</aside>
 
-      <!-- Logbook -->
-      <div id="logbook" class="section">
-        <h2>Logbook</h2>
-        <form id="logbookForm" class="card">
-          <div class="grid-2">
-            <div>
-              <label>Fecha</label>
-              <input type="date" name="date" required />
-            </div>
-            <div>
-              <label>ID vuelo (opcional)</label>
-              <input type="text" name="flight_id" />
-            </div>
-            <div>
-              <label>Aeronave</label>
-              <input type="text" name="aircraft" />
-            </div>
-            <div>
-              <label>Block time</label>
-              <input type="text" name="block_time" placeholder="02:15" />
-            </div>
-          </div>
-          <label>Observaciones</label>
-          <textarea name="remarks" rows="3"></textarea>
-          <button type="submit" class="secondary-btn">Añadir entrada</button>
-          <p id="logbookMsg" class="success-msg"></p>
-        </form>
+<!-- Main -->
+<main class="main">
 
-        <div class="card">
-          <h3>Entradas</h3>
-          <table id="logbookTable">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Vuelo</th>
-                <th>Aeronave</th>
-                <th>Block</th>
-                <th>Notas</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
+<header class="topbar">
+<div>
+<h2>Operations Dashboard</h2>
+<p id="currentUser"></p>
+</div>
+<div class="status-dot"></div>
+</header>
 
-  <script type="module" src="app-dashboard.js"></script>
+<section id="overview" class="section active">
+<div class="cards">
+
+<div class="card glass">
+<h4>Total Flights</h4>
+<h1 id="totalFlights">0</h1>
+</div>
+
+<div class="card glass">
+<h4>Total Bookings</h4>
+<h1 id="totalBookings">0</h1>
+</div>
+
+<div class="card glass">
+<h4>Total Hours</h4>
+<h1 id="totalHours">0</h1>
+</div>
+
+</div>
+</section>
+
+<section id="flights" class="section">
+<div class="glass table-card">
+<h3>Available Flights</h3>
+<table id="flightsTable">
+<thead>
+<tr>
+<th>#</th>
+<th>Origin</th>
+<th>Destination</th>
+<th></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</section>
+
+<section id="bookings" class="section">
+<div class="glass table-card">
+<h3>My Bookings</h3>
+<table id="bookingsTable">
+<thead>
+<tr>
+<th>ID</th>
+<th>Status</th>
+<th>Flight</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</section>
+
+<section id="logbook" class="section">
+<div class="glass table-card">
+<h3>Logbook</h3>
+<table id="logbookTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Aircraft</th>
+<th>Block</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</section>
+
+</main>
+</div>
+
+<script type="module" src="app-dashboard.js"></script>
 </body>
 </html>
