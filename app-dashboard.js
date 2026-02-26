@@ -19,26 +19,29 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const currentUserSpan = document.getElementById("currentUser");
-const logoutBtn = document.getElementById("logoutBtn");
-
+let authChecked = false;
 let currentUser = null;
 
 onAuthStateChanged(auth, async user => {
+  if (authChecked) return;
+  authChecked = true;
+
   if (!user) {
-    window.location.href = "index.html";
+    window.location.replace("index.html");
     return;
   }
+
   currentUser = user;
-  currentUserSpan.textContent = user.email;
+  document.getElementById("currentUser").textContent = user.email;
+
   await loadFlights();
   await loadBookings();
   await loadLogbook();
 });
 
-logoutBtn.addEventListener("click", async () => {
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
-  window.location.href = "index.html";
+  window.location.replace("index.html");
 });
 
 document.querySelectorAll(".nav-item").forEach(btn => {
@@ -50,16 +53,15 @@ document.querySelectorAll(".nav-item").forEach(btn => {
   });
 });
 
-const flightForm = document.getElementById("flightForm");
-flightForm.addEventListener("submit", async e => {
+document.getElementById("flightForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(flightForm).entries());
+  const data = Object.fromEntries(new FormData(e.target).entries());
   await addDoc(collection(db, "flights"), {
     ...data,
     createdBy: currentUser.uid,
     createdAt: serverTimestamp()
   });
-  flightForm.reset();
+  e.target.reset();
   await loadFlights();
 });
 
@@ -80,6 +82,7 @@ async function loadFlights() {
     `;
     tbody.appendChild(tr);
   });
+
   document.querySelectorAll(".book-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       await addDoc(collection(db, "bookings"), {
@@ -103,8 +106,8 @@ async function loadBookings() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${docSnap.id}</td>
-      <td>${b.status}</td>
       <td>${b.flightId}</td>
+      <td>${b.status}</td>
       <td>${b.bookedAt ? "Confirmed" : ""}</td>
       <td></td>
       <td></td>
@@ -113,16 +116,15 @@ async function loadBookings() {
   });
 }
 
-const logbookForm = document.getElementById("logbookForm");
-logbookForm.addEventListener("submit", async e => {
+document.getElementById("logbookForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(logbookForm).entries());
+  const data = Object.fromEntries(new FormData(e.target).entries());
   await addDoc(collection(db, "logbook"), {
     ...data,
     userId: currentUser.uid,
     createdAt: serverTimestamp()
   });
-  logbookForm.reset();
+  e.target.reset();
   await loadLogbook();
 });
 
