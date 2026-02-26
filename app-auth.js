@@ -31,7 +31,7 @@ tabButtons.forEach(btn => {
   });
 });
 
-// Convertir username → email interno
+// username → email interno
 function usernameToEmail(username) {
   return `${username}@vlevel.app`;
 }
