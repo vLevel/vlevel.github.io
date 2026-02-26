@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Virtual LEVEL - Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <div class="brand-header">
+      <img src="img/level-logo.png" alt="LEVEL" class="logo" />
+      <h1>Virtual LEVEL</h1>
+      <p class="subtitle">Flight Planning & Booking System</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-button active" data-tab="login">Iniciar sesión</button>
+      <button class="tab-button" data-tab="register">Registrarse</button>
+    </div>
+
+    <div id="login" class="tab-content active">
+      <form id="loginForm">
+        <label>Usuario</label>
+        <input type="text" name="username" placeholder="Usuario" required />
+        <label>Contraseña</label>
+        <input type="password" name="password" placeholder="Contraseña" required />
+        <button type="submit" class="primary-btn">Entrar</button>
+        <p class="hint">Usuario de prueba: <strong>mz</strong> / <strong>981423</strong></p>
+        <p id="loginError" class="error-msg"></p>
+      </form>
+    </div>
+
+    <div id="register" class="tab-content">
+      <form id="registerForm">
+        <label>Usuario</label>
+        <input type="text" name="username" placeholder="Elige un usuario" required />
+        <label>Contraseña</label>
+        <input type="password" name="password" placeholder="Elige una contraseña" required />
+        <button type="submit" class="secondary-btn">Crear cuenta</button>
+        <p id="registerError" class="error-msg"></p>
+        <p id="registerSuccess" class="success-msg"></p>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="app-auth.js"></script>
+</body>
+</html>
