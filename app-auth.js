@@ -3,6 +3,8 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
@@ -10,57 +12,44 @@ import { firebaseConfig } from "./firebase-config.js";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-let authChecked = false;
+await setPersistence(auth, browserLocalPersistence);
 
 onAuthStateChanged(auth, user => {
-  if (authChecked) return;
-  authChecked = true;
-
   if (user) {
-    window.location.replace("dashboard.html");
+    window.location.href = "dashboard.html";
   }
 });
 
-const tabs = document.querySelectorAll(".tab-button");
+const tabs = document.querySelectorAll(".tab-btn");
 const contents = document.querySelectorAll(".tab-content");
 
 tabs.forEach(btn => {
-  btn.addEventListener("click", () => {
+  btn.onclick = () => {
     tabs.forEach(b => b.classList.remove("active"));
     contents.forEach(c => c.classList.remove("active"));
     btn.classList.add("active");
     document.getElementById(btn.dataset.tab).classList.add("active");
-  });
+  };
 });
 
-const loginForm = document.getElementById("loginForm");
-const loginError = document.getElementById("loginError");
-
-loginForm.addEventListener("submit", async e => {
+document.getElementById("loginForm").onsubmit = async e => {
   e.preventDefault();
-  loginError.textContent = "";
-  const data = Object.fromEntries(new FormData(loginForm).entries());
+  const data = Object.fromEntries(new FormData(e.target).entries());
   try {
     await signInWithEmailAndPassword(auth, data.email, data.password);
-    window.location.replace("dashboard.html");
-  } catch {
-    loginError.textContent = "Invalid credentials";
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    document.getElementById("loginError").textContent = err.message;
   }
-});
+};
 
-const registerForm = document.getElementById("registerForm");
-const registerError = document.getElementById("registerError");
-const registerSuccess = document.getElementById("registerSuccess");
-
-registerForm.addEventListener("submit", async e => {
+document.getElementById("registerForm").onsubmit = async e => {
   e.preventDefault();
-  registerError.textContent = "";
-  registerSuccess.textContent = "";
-  const data = Object.fromEntries(new FormData(registerForm).entries());
+  const data = Object.fromEntries(new FormData(e.target).entries());
   try {
     await createUserWithEmailAndPassword(auth, data.email, data.password);
-    registerSuccess.textContent = "Account created";
-  } catch {
-    registerError.textContent = "Registration error";
+    document.getElementById("registerSuccess").textContent = "Account created successfully";
+  } catch (err) {
+    document.getElementById("registerError").textContent = err.message;
   }
-});
+};
