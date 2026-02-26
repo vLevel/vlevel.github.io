@@ -1,148 +1,80 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let authChecked = false;
-let currentUser = null;
-
 onAuthStateChanged(auth, async user => {
-  if (authChecked) return;
-  authChecked = true;
+if (!user) window.location.href="index.html";
 
-  if (!user) {
-    window.location.replace("index.html");
-    return;
-  }
+document.getElementById("currentUser").textContent=user.email;
 
-  currentUser = user;
-  document.getElementById("currentUser").textContent = user.email;
-
-  await loadFlights();
-  await loadBookings();
-  await loadLogbook();
+loadStats(user.uid);
+loadFlights();
+loadBookings(user.uid);
+loadLogbook(user.uid);
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.replace("index.html");
+document.getElementById("logoutBtn").onclick=async()=>{
+await signOut(auth);
+window.location.href="index.html";
+};
+
+document.querySelectorAll(".nav-item").forEach(btn=>{
+btn.onclick=()=>{
+document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+btn.classList.add("active");
+document.getElementById(btn.dataset.section).classList.add("active");
+};
 });
 
-document.querySelectorAll(".nav-item").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.section).classList.add("active");
-  });
-});
+async function loadStats(uid){
+const flightsSnap=await getDocs(collection(db,"flights"));
+document.getElementById("totalFlights").textContent=flightsSnap.size;
 
-document.getElementById("flightForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  await addDoc(collection(db, "flights"), {
-    ...data,
-    createdBy: currentUser.uid,
-    createdAt: serverTimestamp()
-  });
-  e.target.reset();
-  await loadFlights();
-});
+const bookingsSnap=await getDocs(query(collection(db,"bookings"),where("userId","==",uid)));
+document.getElementById("totalBookings").textContent=bookingsSnap.size;
 
-async function loadFlights() {
-  const tbody = document.querySelector("#flightsTable tbody");
-  tbody.innerHTML = "";
-  const snap = await getDocs(collection(db, "flights"));
-  snap.forEach(docSnap => {
-    const f = docSnap.data();
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${f.flight_number}</td>
-      <td>${f.origin}</td>
-      <td>${f.destination}</td>
-      <td>${f.departure_time || ""}</td>
-      <td>${f.arrival_time || ""}</td>
-      <td><button class="book-btn" data-id="${docSnap.id}">Book</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  document.querySelectorAll(".book-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      await addDoc(collection(db, "bookings"), {
-        userId: currentUser.uid,
-        flightId: btn.dataset.id,
-        status: "BOOKED",
-        bookedAt: serverTimestamp()
-      });
-      await loadBookings();
-    });
-  });
+const logSnap=await getDocs(query(collection(db,"logbook"),where("userId","==",uid)));
+document.getElementById("totalHours").textContent=logSnap.size;
 }
 
-async function loadBookings() {
-  const tbody = document.querySelector("#bookingsTable tbody");
-  tbody.innerHTML = "";
-  const q = query(collection(db, "bookings"), where("userId", "==", currentUser.uid));
-  const snap = await getDocs(q);
-  snap.forEach(docSnap => {
-    const b = docSnap.data();
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${docSnap.id}</td>
-      <td>${b.flightId}</td>
-      <td>${b.status}</td>
-      <td>${b.bookedAt ? "Confirmed" : ""}</td>
-      <td></td>
-      <td></td>
-    `;
-    tbody.appendChild(tr);
-  });
+async function loadFlights(){
+const tbody=document.querySelector("#flightsTable tbody");
+tbody.innerHTML="";
+const snap=await getDocs(collection(db,"flights"));
+snap.forEach(doc=>{
+const f=doc.data();
+const tr=document.createElement("tr");
+tr.innerHTML=`<td>${f.flight_number}</td><td>${f.origin}</td><td>${f.destination}</td><td></td>`;
+tbody.appendChild(tr);
+});
 }
 
-document.getElementById("logbookForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  await addDoc(collection(db, "logbook"), {
-    ...data,
-    userId: currentUser.uid,
-    createdAt: serverTimestamp()
-  });
-  e.target.reset();
-  await loadLogbook();
+async function loadBookings(uid){
+const tbody=document.querySelector("#bookingsTable tbody");
+tbody.innerHTML="";
+const snap=await getDocs(query(collection(db,"bookings"),where("userId","==",uid)));
+snap.forEach(doc=>{
+const b=doc.data();
+const tr=document.createElement("tr");
+tr.innerHTML=`<td>${doc.id}</td><td>${b.status}</td><td>${b.flightId}</td>`;
+tbody.appendChild(tr);
 });
+}
 
-async function loadLogbook() {
-  const tbody = document.querySelector("#logbookTable tbody");
-  tbody.innerHTML = "";
-  const q = query(collection(db, "logbook"), where("userId", "==", currentUser.uid));
-  const snap = await getDocs(q);
-  snap.forEach(docSnap => {
-    const e = docSnap.data();
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${e.date}</td>
-      <td>${e.flight_id || ""}</td>
-      <td>${e.aircraft || ""}</td>
-      <td>${e.block_time || ""}</td>
-      <td>${e.remarks || ""}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+async function loadLogbook(uid){
+const tbody=document.querySelector("#logbookTable tbody");
+tbody.innerHTML="";
+const snap=await getDocs(query(collection(db,"logbook"),where("userId","==",uid)));
+snap.forEach(doc=>{
+const e=doc.data();
+const tr=document.createElement("tr");
+tr.innerHTML=`<td>${e.date}</td><td>${e.aircraft}</td><td>${e.block_time}</td>`;
+tbody.appendChild(tr);
+});
 }
