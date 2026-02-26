@@ -11,29 +11,24 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Config (misma que en app-auth.js)
-const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "vlevel.firebaseapp.com",
-  projectId: "vlevel",
-  appId: "1:728207102095:web:9f7d1e3ff1614b7505e0fa",
-  messagingSenderId: "728207102095"
-};
+import { firebaseConfig } from "./firebase-config.js";
 
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// UI
 const currentUserSpan = document.getElementById('currentUser');
 const logoutBtn = document.getElementById('logoutBtn');
 
-// Navegación secciones
+// Navegación
 const navItems = document.querySelectorAll('.nav-item');
 const sections = document.querySelectorAll('.section');
+
 navItems.forEach(btn => {
   btn.addEventListener('click', () => {
     navItems.forEach(b => b.classList.remove('active'));
@@ -43,7 +38,7 @@ navItems.forEach(btn => {
   });
 });
 
-// Auth state
+// Estado de usuario
 let currentUser = null;
 
 onAuthStateChanged(auth, async user => {
@@ -51,8 +46,10 @@ onAuthStateChanged(auth, async user => {
     window.location.href = 'index.html';
     return;
   }
+
   currentUser = user;
   currentUserSpan.textContent = `Conectado como ${user.email.split('@')[0]}`;
+
   await loadFlights();
   await loadBookings();
   await loadLogbook();
@@ -71,7 +68,9 @@ const flightMsg = document.getElementById('flightMsg');
 flightForm.addEventListener('submit', async e => {
   e.preventDefault();
   flightMsg.textContent = '';
+
   const data = Object.fromEntries(new FormData(flightForm).entries());
+
   try {
     await addDoc(collection(db, "flights"), {
       flight_number: data.flight_number,
@@ -82,6 +81,7 @@ flightForm.addEventListener('submit', async e => {
       createdBy: currentUser.uid,
       createdAt: serverTimestamp()
     });
+
     flightMsg.textContent = 'Ruta creada.';
     flightForm.reset();
     await loadFlights();
@@ -97,7 +97,9 @@ const logbookMsg = document.getElementById('logbookMsg');
 logbookForm.addEventListener('submit', async e => {
   e.preventDefault();
   logbookMsg.textContent = '';
+
   const data = Object.fromEntries(new FormData(logbookForm).entries());
+
   try {
     await addDoc(collection(db, "logbook"), {
       userId: currentUser.uid,
@@ -108,6 +110,7 @@ logbookForm.addEventListener('submit', async e => {
       remarks: data.remarks || '',
       createdAt: serverTimestamp()
     });
+
     logbookMsg.textContent = 'Entrada añadida.';
     logbookForm.reset();
     await loadLogbook();
@@ -120,10 +123,13 @@ logbookForm.addEventListener('submit', async e => {
 async function loadFlights() {
   const tbody = document.querySelector('#flightsTable tbody');
   tbody.innerHTML = '';
+
   const snap = await getDocs(collection(db, "flights"));
+
   snap.forEach(docSnap => {
     const f = docSnap.data();
     const tr = document.createElement('tr');
+
     tr.innerHTML = `
       <td>${f.flight_number}</td>
       <td>${f.origin}</td>
@@ -132,18 +138,21 @@ async function loadFlights() {
       <td>${f.arrival_time || ''}</td>
       <td><button class="book-btn" data-id="${docSnap.id}">Book</button></td>
     `;
+
     tbody.appendChild(tr);
   });
 
   tbody.querySelectorAll('.book-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const flightId = btn.dataset.id;
+
       await addDoc(collection(db, "bookings"), {
         userId: currentUser.uid,
         flightId,
         status: 'BOOKED',
         bookedAt: serverTimestamp()
       });
+
       await loadBookings();
     });
   });
@@ -158,9 +167,9 @@ async function loadBookings() {
     collection(db, "bookings"),
     where("userId", "==", currentUser.uid)
   );
+
   const snap = await getDocs(q);
 
-  // Para mostrar datos del vuelo, primero cargamos todos los vuelos en memoria
   const flightsSnap = await getDocs(collection(db, "flights"));
   const flightsMap = {};
   flightsSnap.forEach(f => flightsMap[f.id] = f.data());
@@ -168,6 +177,7 @@ async function loadBookings() {
   snap.forEach(docSnap => {
     const b = docSnap.data();
     const f = flightsMap[b.flightId] || {};
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${docSnap.id}</td>
@@ -177,6 +187,7 @@ async function loadBookings() {
       <td>${b.status}</td>
       <td>${b.bookedAt ? '' : ''}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
@@ -190,9 +201,9 @@ async function loadLogbook() {
     collection(db, "logbook"),
     where("userId", "==", currentUser.uid)
   );
+
   const snap = await getDocs(q);
 
-  // Opcional: mapear flight_id a flight_number
   const flightsSnap = await getDocs(collection(db, "flights"));
   const flightsMap = {};
   flightsSnap.forEach(f => flightsMap[f.id] = f.data());
@@ -200,6 +211,7 @@ async function loadLogbook() {
   snap.forEach(docSnap => {
     const e = docSnap.data();
     const f = e.flight_id ? flightsMap[e.flight_id] : null;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${e.date}</td>
@@ -208,6 +220,7 @@ async function loadLogbook() {
       <td>${e.block_time || ''}</td>
       <td>${e.remarks || ''}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
