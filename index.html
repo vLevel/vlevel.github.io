@@ -1,57 +1,67 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Virtual LEVEL - Crew Portal</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>Virtual LEVEL OPS</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body class="crew-body">
-  <div class="crew-container">
-    <div class="crew-left">
-      <div class="crew-brand">
-        <h2>VIRTUAL LEVEL OPS</h2>
-      </div>
 
-      <h1>Crew Portal Access</h1>
-      <p class="crew-sub">Authorized crew members only.</p>
+<div class="crew-container">
 
-      <div class="tabs">
-        <button class="tab-button active" data-tab="login">Login</button>
-        <button class="tab-button" data-tab="register">Register</button>
-      </div>
+<div class="crew-left">
 
-      <div id="login" class="tab-content active">
-        <form id="loginForm">
-          <label>Email</label>
-          <input type="email" name="email" required />
-          <label>Password</label>
-          <input type="password" name="password" required />
-          <button type="submit" class="primary-btn">Authenticate</button>
-          <p id="loginError" class="error-msg"></p>
-        </form>
-      </div>
+<div class="logo-area">
+<img src="level-logo.png" class="logo">
+<h2>VIRTUAL LEVEL OPS</h2>
+</div>
 
-      <div id="register" class="tab-content">
-        <form id="registerForm">
-          <label>Email</label>
-          <input type="email" name="email" required />
-          <label>Password</label>
-          <input type="password" name="password" required />
-          <button type="submit" class="primary-btn">Create Account</button>
-          <p id="registerError" class="error-msg"></p>
-          <p id="registerSuccess" class="success-msg"></p>
-        </form>
-      </div>
-    </div>
+<h1>Crew Portal Access</h1>
+<p class="sub">Authorized crew members only</p>
 
-    <div class="crew-right">
-      <div class="crew-right-content">
-        <h2>Flight Operations</h2>
-        <p>Secure portal for Virtual LEVEL crew members.</p>
-      </div>
-    </div>
-  </div>
+<div class="tabs">
+<button class="tab-btn active" data-tab="login">Login</button>
+<button class="tab-btn" data-tab="register">Register</button>
+</div>
 
-  <script type="module" src="app-auth.js"></script>
+<div id="login" class="tab-content active">
+<form id="loginForm">
+<label>Email</label>
+<input type="email" name="email" required>
+
+<label>Password</label>
+<input type="password" name="password" required>
+
+<button type="submit" class="btn-primary">Authenticate</button>
+<p id="loginError" class="error"></p>
+</form>
+</div>
+
+<div id="register" class="tab-content">
+<form id="registerForm">
+<label>Email</label>
+<input type="email" name="email" required>
+
+<label>Password</label>
+<input type="password" name="password" required>
+
+<button type="submit" class="btn-secondary">Create Account</button>
+<p id="registerError" class="error"></p>
+<p id="registerSuccess" class="success"></p>
+</form>
+</div>
+
+</div>
+
+<div class="crew-right">
+<div class="right-content">
+<h2>Flight Operations</h2>
+<p>Secure portal for Virtual LEVEL flight crew.</p>
+</div>
+</div>
+
+</div>
+
+<script type="module" src="app-auth.js"></script>
 </body>
 </html>
